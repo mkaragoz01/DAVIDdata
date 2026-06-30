@@ -13,7 +13,6 @@ export default function KpiCard({
   sub,
   accent = "var(--green)",
   icon,
-  trend,
 }: KpiCardProps) {
   return (
     <div

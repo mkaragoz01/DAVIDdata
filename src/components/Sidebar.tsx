@@ -18,11 +18,14 @@ export default function Sidebar() {
 
   useEffect(() => {
     const handler = (e: CustomEvent) => setMobileOpen(e.detail);
-    window.addEventListener("sidebar-toggle" as any, handler);
-    return () => window.removeEventListener("sidebar-toggle" as any, handler);
+    window.addEventListener("sidebar-toggle", handler as EventListener);
+    return () => window.removeEventListener("sidebar-toggle", handler as EventListener);
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    const id = setTimeout(() => setMobileOpen(false), 0);
+    return () => clearTimeout(id);
+  }, [pathname]);
 
   const close = () => {
     setMobileOpen(false);

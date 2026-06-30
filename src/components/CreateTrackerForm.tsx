@@ -56,7 +56,7 @@ export default function CreateTrackerForm() {
 
         <div style={{ fontSize: "11px", color: "var(--text-3)", background: "rgba(255,255,255,.03)", padding: "8px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}>
           Virgülle ayır · maks 4 senaryo<br />
-          <span style={{ color: "var(--text-2)" }}>Örn: "10,15,20" → %10 %15 %20 kolonları</span>
+          <span style={{ color: "var(--text-2)" }}>Örn: &ldquo;10,15,20&rdquo; → %10 %15 %20 kolonları</span>
         </div>
 
         <button type="submit" className="btn btn-purple" style={{ width: "100%", padding: "10px" }}>

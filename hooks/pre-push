@@ -1,0 +1,80 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────
+# PRE-PUSH HOOK — DAVIData
+# GitHub'a push öncesi çalışır. Hata varsa push engellenir.
+# ─────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo ""
+echo "🚀 DAVIData pre-push kontrolleri başlıyor..."
+echo "────────────────────────────────────────────────"
+
+REMOTE=$1
+URL=$2
+echo "${BLUE}▸ Hedef: $REMOTE ($URL)${NC}"
+
+# ── 1. Main/master branch koruması ──────────────────────
+BRANCH=$(git symbolic-ref HEAD | sed 's/refs\/heads\///')
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+  echo "${YELLOW}  ⚠ Ana branch'e push yapılıyor: $BRANCH${NC}"
+fi
+
+# ── 2. Uncommitted değişiklik kontrolü ──────────────────
+echo "▸ Çalışma ağacı kontrolü..."
+if ! git diff-index --quiet HEAD --; then
+  echo "${RED}✗ HATA: Commit edilmemiş değişiklikler var.${NC}"
+  echo "  Önce 'git add . && git commit' yap."
+  exit 1
+fi
+echo "${GREEN}  ✓ Çalışma ağacı temiz${NC}"
+
+# ── 3. Full Next.js build ────────────────────────────────
+echo "▸ Next.js production build kontrolü..."
+npm run build 2>&1
+BUILD_EXIT=$?
+
+if [ $BUILD_EXIT -ne 0 ]; then
+  echo "${RED}✗ HATA: Build başarısız! Hataları düzelt ve tekrar push yap.${NC}"
+  exit 1
+fi
+echo "${GREEN}  ✓ Build başarılı${NC}"
+
+# ── 4. Kritik dosya varlık kontrolü ─────────────────────
+echo "▸ Kritik dosya kontrolü..."
+REQUIRED_FILES="src/lib/store.ts src/lib/calculations.ts src/app/layout.tsx"
+for f in $REQUIRED_FILES; do
+  if [ ! -f "$f" ]; then
+    echo "${RED}✗ HATA: Kritik dosya eksik: $f${NC}"
+    exit 1
+  fi
+done
+echo "${GREEN}  ✓ Kritik dosyalar mevcut${NC}"
+
+# ── 5. package.json / package-lock.json senkron mu? ─────
+echo "▸ Package lock senkron kontrolü..."
+if git diff --name-only HEAD | grep -q "package.json"; then
+  if ! git diff --name-only HEAD | grep -q "package-lock.json"; then
+    echo "${YELLOW}  ⚠ Uyarı: package.json değişti ama package-lock.json güncellenmedi.${NC}"
+    echo "    'npm install' çalıştırmayı unutma."
+  fi
+fi
+echo "${GREEN}  ✓ Package dosyaları senkron${NC}"
+
+# ── 6. Büyük dosya kontrolü (>1MB) ──────────────────────
+echo "▸ Büyük dosya kontrolü..."
+LARGE=$(git diff --cached --name-only | xargs -I{} sh -c \
+  'size=$(stat -c%s "{}" 2>/dev/null || echo 0); [ "$size" -gt 1048576 ] && echo "{}: ${size} bytes"' 2>/dev/null)
+if [ -n "$LARGE" ]; then
+  echo "${YELLOW}  ⚠ Uyarı: 1MB üzeri dosya tespit edildi:${NC}"
+  echo "$LARGE"
+fi
+
+echo "────────────────────────────────────────────────"
+echo "${GREEN}✓ Tüm pre-push kontrolleri geçti. Push devam ediyor.${NC}"
+echo ""
+exit 0

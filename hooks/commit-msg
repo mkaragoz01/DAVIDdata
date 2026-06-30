@@ -1,0 +1,44 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────
+# COMMIT-MSG HOOK — DAVIData
+# Commit mesajı formatını kontrol eder.
+# ─────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+COMMIT_MSG=$(cat "$1")
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -1)
+
+# Geçerli prefix'ler (Conventional Commits)
+VALID_PREFIXES="feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert"
+
+if ! echo "$FIRST_LINE" | grep -qE "^($VALID_PREFIXES)(\(.+\))?: .{3,}"; then
+  echo ""
+  echo "${RED}✗ HATA: Geçersiz commit mesajı formatı.${NC}"
+  echo ""
+  echo "  Kullanım:  <tip>: <açıklama>"
+  echo "  Örnek:     feat: yatırım tablosuna not kolonu eklendi"
+  echo "             fix: pie chart boş veri hatası düzeltildi"
+  echo "             docs: README güncellendi"
+  echo ""
+  echo "  Geçerli tipler: feat, fix, docs, style, refactor, test, chore, perf"
+  echo ""
+  exit 1
+fi
+
+# Çok kısa mesaj kontrolü
+if [ ${#FIRST_LINE} -lt 15 ]; then
+  echo "${RED}✗ HATA: Commit mesajı çok kısa (min. 15 karakter).${NC}"
+  exit 1
+fi
+
+# Çok uzun mesaj kontrolü (72 karakter)
+if [ ${#FIRST_LINE} -gt 72 ]; then
+  echo "${RED}✗ HATA: Commit mesajının ilk satırı 72 karakteri geçemez (${#FIRST_LINE} karakter).${NC}"
+  exit 1
+fi
+
+echo "${GREEN}✓ Commit mesajı formatı geçerli.${NC}"
+exit 0

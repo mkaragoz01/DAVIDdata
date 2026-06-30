@@ -9,8 +9,8 @@ export default function MobileHeader() {
   // Expose toggle to Sidebar via custom event
   useEffect(() => {
     const handler = (e: CustomEvent) => setOpen(e.detail);
-    window.addEventListener("sidebar-toggle" as any, handler);
-    return () => window.removeEventListener("sidebar-toggle" as any, handler);
+    window.addEventListener("sidebar-toggle", handler as EventListener);
+    return () => window.removeEventListener("sidebar-toggle", handler as EventListener);
   }, []);
 
   const toggle = () => {

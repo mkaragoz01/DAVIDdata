@@ -1,0 +1,77 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────
+# PRE-COMMIT HOOK — DAVIData
+# Commit öncesi çalışır. Hata varsa commit engellenir.
+# ─────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo ""
+echo "🔍 DAVIData pre-commit kontrolleri başlıyor..."
+echo "────────────────────────────────────────────────"
+
+# ── 1. Hassas veri kontrolü ──────────────────────────────
+echo "▸ Hassas veri taraması..."
+
+STAGED=$(git diff --cached --name-only)
+
+# .env dosyası stage'lendi mi?
+if echo "$STAGED" | grep -qE "^\.env"; then
+  echo "${RED}✗ HATA: .env dosyası commit edilemez! Hassas veri içeriyor.${NC}"
+  exit 1
+fi
+
+# API key / secret / password pattern taraması
+SENSITIVE=$(git diff --cached -U0 | grep "^+" | grep -iE \
+  "(api_key|apikey|secret|password|token|private_key)\s*=\s*['\"][^'\"]{8,}" \
+  | grep -v "example\|placeholder\|your_key\|xxx")
+
+if [ -n "$SENSITIVE" ]; then
+  echo "${RED}✗ HATA: Kodda hassas veri (API key/secret/password) tespit edildi:${NC}"
+  echo "$SENSITIVE"
+  exit 1
+fi
+echo "${GREEN}  ✓ Hassas veri bulunamadı${NC}"
+
+# ── 2. console.log kontrolü ─────────────────────────────
+echo "▸ console.log taraması..."
+
+CONSOLE_LOGS=$(git diff --cached --name-only | grep -E "\.(ts|tsx|js|jsx)$" | \
+  xargs -I{} git diff --cached {} 2>/dev/null | \
+  grep "^+" | grep "console\.log" | grep -v "//.*console\.log")
+
+if [ -n "$CONSOLE_LOGS" ]; then
+  echo "${YELLOW}  ⚠ Uyarı: console.log ifadeleri bulundu (commit devam ediyor):${NC}"
+  echo "$CONSOLE_LOGS" | head -5
+else
+  echo "${GREEN}  ✓ console.log yok${NC}"
+fi
+
+# ── 3. TypeScript dosyası var mı? ───────────────────────
+TS_FILES=$(echo "$STAGED" | grep -E "\.(ts|tsx)$")
+if [ -n "$TS_FILES" ]; then
+  echo "▸ TypeScript syntax kontrolü..."
+  npx tsc --noEmit --skipLibCheck 2>&1
+  if [ $? -ne 0 ]; then
+    echo "${RED}✗ HATA: TypeScript hataları var. Düzelt ve tekrar dene.${NC}"
+    exit 1
+  fi
+  echo "${GREEN}  ✓ TypeScript hata yok${NC}"
+fi
+
+# ── 4. ESLint ───────────────────────────────────────────
+echo "▸ ESLint kontrolü..."
+npx eslint . --ext .ts,.tsx --max-warnings=0 2>&1
+if [ $? -ne 0 ]; then
+  echo "${RED}✗ HATA: ESLint hataları var. Düzelt ve tekrar dene.${NC}"
+  exit 1
+fi
+echo "${GREEN}  ✓ ESLint temiz${NC}"
+
+echo "────────────────────────────────────────────────"
+echo "${GREEN}✓ Tüm pre-commit kontrolleri geçti. Commit devam ediyor.${NC}"
+echo ""
+exit 0

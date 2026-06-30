@@ -15,7 +15,6 @@ export default function TransactionForm() {
   const [success, setSuccess] = useState(false);
 
   const categories = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  const typeAccent = type === "income" ? "var(--green)" : "var(--pink)";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

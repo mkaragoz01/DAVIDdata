@@ -3,6 +3,18 @@
 import { useFinanceStore } from "@/lib/store";
 import { Download, Upload, Trash2 } from "lucide-react";
 
+function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--text-1)" }}>{title}</div>
+        {sub && <div style={{ fontSize: "12.5px", color: "var(--text-3)", marginTop: "3px" }}>{sub}</div>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { transactions, trackers } = useFinanceStore();
 
@@ -42,16 +54,6 @@ export default function SettingsPage() {
       window.location.reload();
     }
   };
-
-  const Section = ({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) => (
-    <div className="card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div>
-        <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--text-1)" }}>{title}</div>
-        {sub && <div style={{ fontSize: "12.5px", color: "var(--text-3)", marginTop: "3px" }}>{sub}</div>}
-      </div>
-      {children}
-    </div>
-  );
 
   return (
     <div style={{ maxWidth: "580px", display: "flex", flexDirection: "column", gap: "24px" }}>
