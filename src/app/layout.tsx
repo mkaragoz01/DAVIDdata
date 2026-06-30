@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import MobileHeader from "@/components/MobileHeader";
@@ -6,6 +6,11 @@ import MobileHeader from "@/components/MobileHeader";
 export const metadata: Metadata = {
   title: "DAVIData — Kişisel Finans Takibi",
   description: "Gelir, gider ve yatırımlarınızı tek panelden yönetin.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
