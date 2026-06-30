@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DAVIData — Kişisel Finans & Yatırım Takip Uygulaması
 
-## Getting Started
+> Gelir, gider ve yatırımlarınızı tek panelden yönetin. Yerel ortamda çalışır, verileriniz tarayıcınızda kalır.
 
-First, run the development server:
+---
+
+## Özellikler
+
+### Dashboard
+- Net Varlık (Gelir − Gider + Yatırım Toplamı) KPI kartı
+- Aylık gelir / gider metrikleri
+- Kategori bazlı pasta grafikler (Donut Chart)
+- Son işlemler ve yatırım planları özet paneli
+
+### Gelir / Gider Takibi
+- Gelir ve gider girişi (miktar, kategori, tarih, not)
+- Arama ve tür filtresi (Tümü / Gelir / Gider)
+- Kategori bazlı dağılım grafikleri
+- Anlık silme işlemi
+
+### Yatırım Takibi — Excel Formatı
+Aylık **değişken katkılarla** çalışan, sektöre özgü senaryo karşılaştırma tablosu:
+
+| Ay | Mevcut Para | Eklenen Para | Toplam Para | %10 Artarsa | %15 Artarsa | %20 Artarsa |
+|----|-------------|-------------|-------------|-------------|-------------|-------------|
+| Ay 1 | 34.545 | 5.000 | 39.545 | 43.499 | 45.476 | 47.454 |
+| Ay 2 | 39.545 | 14.000 | 53.545 | 58.899 | 61.576 | 64.254 |
+| ... | ... | ... | ... | ... | ... | ... |
+
+- Senaryo oranları özelleştirilebilir (varsayılan: %10, %15, %20)
+- Çok eksenli büyüme grafiği (gerçek toplam vs. senaryo çizgileri)
+- Son ayı geri alma butonu
+
+### Ayarlar
+- JSON olarak veri yedekleme ve geri yükleme
+- Tek tıkla tüm veri silme
+
+---
+
+## Teknoloji Yığını
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Dil | TypeScript |
+| Stil | Tailwind CSS v4 |
+| Grafikler | Recharts |
+| State | Zustand + persist (LocalStorage) |
+| İkonlar | Lucide React |
+
+---
+
+## Kurulum
 
 ```bash
+# Depoyu klonla
+git clone https://github.com/mkaragoz.01/davidata.git
+cd davidata
+
+# Bağımlılıkları yükle
+npm install
+
+# Geliştirme sunucusunu başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Production build
+npm run build
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Proje Yapısı
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── page.tsx              # Dashboard
+│   ├── transactions/         # Gelir/Gider sayfası
+│   ├── investments/          # Yatırım takip sayfası
+│   ├── settings/             # Ayarlar sayfası
+│   └── globals.css           # Design tokens & global stiller
+├── components/
+│   ├── Sidebar.tsx           # Responsive nav (mobile drawer)
+│   ├── MobileHeader.tsx      # Mobil hamburger header
+│   ├── KpiCard.tsx           # Metrik kartı
+│   ├── ExpensePieChart.tsx   # Donut grafik
+│   ├── TransactionForm.tsx   # İşlem ekleme formu
+│   ├── TransactionList.tsx   # Filtrelenebilir işlem listesi
+│   ├── CreateTrackerForm.tsx # Yeni yatırım planı formu
+│   ├── TrackerPanel.tsx      # Yatırım paneli (tablo + grafik)
+│   ├── TrackerTable.tsx      # Excel-format senaryo tablosu
+│   └── TrackerChart.tsx      # Büyüme çizgi grafiği
+└── lib/
+    ├── store.ts              # Zustand store (LocalStorage persist)
+    └── calculations.ts       # Finansal hesaplama fonksiyonları
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Veri Saklama
 
-## Deploy on Vercel
+Tüm veriler tarayıcının **LocalStorage** alanına kaydedilir (`davidata-storage-v2`). Sunucu gerekmez, internet bağlantısı gerekmez.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Yedekleme:** Ayarlar sayfasından JSON olarak dışa aktarılabilir ve geri yüklenebilir.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Ekran Görüntüleri
+
+> _Dashboard, Gelir/Gider ve Yatırım Takibi sayfaları dark-mode tasarıma sahiptir._
+
+---
+
+## Lisans
+
+MIT
